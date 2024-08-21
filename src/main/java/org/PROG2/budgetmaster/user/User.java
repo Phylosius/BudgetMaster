@@ -4,11 +4,12 @@ import lombok.Getter;
 import lombok.Setter;
 import org.PROG2.budgetmaster.expense.Expense;
 import org.PROG2.budgetmaster.expense.ExpenseCategory;
+import org.PROG2.budgetmaster.utils.DictElement;
 import org.PROG2.budgetmaster.utils.Generator;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 
 @Getter
 @Setter
@@ -22,6 +23,7 @@ public class User {
         this.id = Generator.id();
         this.name = name;
         this.monthlyBudget = monthlyBudget;
+        this.expenses = new ArrayList<>();
 
     }
 
@@ -70,4 +72,47 @@ public class User {
     public boolean isBudgetOverrun(){
         return getMonthTotalExpenses() <= monthlyBudget;
     }
+
+    // EXPENSES SUMMARY
+    public List<ExpenseCategory> getTopCategories(){
+        List<ExpenseCategory> topCategories = new ArrayList<>();
+
+        topCategories = getDictCategories().subList(0, 3).stream().map(DictElement::getKey).toList();
+
+        return topCategories;
+    }
+
+    public List<DictElement<ExpenseCategory, Double>> calculateAverageSpendingPerCategory() {
+
+        List<DictElement<ExpenseCategory, Double>> dictCategories = new ArrayList<>(getDictCategories());
+        dictCategories.forEach(cat -> {
+            cat.setValue(cat.getValue() / cat.getIntValue());
+        });
+
+        return dictCategories;
+    }
+
+    public List<DictElement<ExpenseCategory, Double>> getDictCategories(){
+
+        List<DictElement<ExpenseCategory, Double>> dictCategories = new ArrayList<>();
+
+        for (ExpenseCategory category : ExpenseCategory.values()) {
+            dictCategories.add(new DictElement<ExpenseCategory, Double>(category, 0d));
+        }
+
+        for (Expense expense : expenses) {
+            dictCategories.forEach(cat -> {
+                if (expense.getCategory().equals(cat.getKey())) {
+                    cat.setValue(cat.getValue() + expense.getAmount());
+                    cat.setIntValue(cat.getIntValue() + 1);
+                }
+            });
+        }
+
+        dictCategories.sort((a, b) -> (int) (b.getValue() - a.getValue()));
+
+        return dictCategories;
+    }
+
+
 }
