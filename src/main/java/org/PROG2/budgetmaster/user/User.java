@@ -2,6 +2,7 @@ package org.PROG2.budgetmaster.user;
 
 import lombok.Getter;
 import lombok.Setter;
+import org.PROG2.budgetmaster.utils.Generator;
 
 import java.util.List;
 
@@ -14,6 +15,7 @@ public class User {
 //    private List<Expenditure> expenditures;
 
     public User(String name, double monthlyBudget) {
+        this.id = Generator.id();
         this.name = name;
         this.monthlyBudget = monthlyBudget;
 
